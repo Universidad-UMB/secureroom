@@ -3,6 +3,7 @@
 import os
 from fastapi import APIRouter, Depends, Form, HTTPException, Request, Response, status
 from fastapi.responses import HTMLResponse, RedirectResponse
+from pydantic import ValidationError as PydanticValidationError
 from fastapi.templating import Jinja2Templates
 
 from app.auth.deps import get_current_user, get_current_user_optional
@@ -19,6 +20,28 @@ router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
 
 
+def _friendly_registration_error(error: PydanticValidationError) -> str:
+    """Convert Pydantic validation details into safe user-facing Spanish text."""
+    for issue in error.errors():
+        location = issue.get("loc", ())
+        field = location[-1] if location else None
+        issue_type = issue.get("type")
+
+        if issue_type == "string_too_short":
+            if field in {"password", "password_confirmation"}:
+                return "La contraseña debe tener al menos 10 caracteres."
+            if field == "name":
+                return "El nombre no puede estar vacío."
+            if field == "email":
+                return "El correo electrónico no puede estar vacío."
+
+        if issue_type == "value_error":
+            message = issue.get("msg", "")
+            return message.removeprefix("Value error, ") or "Revisa los datos ingresados."
+
+    return "Revisa los datos ingresados e inténtalo nuevamente."
+
+
 @router.get("/login", response_class=HTMLResponse)
 async def login_page(
     request: Request,
@@ -32,8 +55,9 @@ async def login_page(
     success_msg = "Cuenta creada exitosamente. Inicie sesión para continuar." if registered else None
 
     response = templates.TemplateResponse(
-        "auth/login.html",
-        {
+        request=request,
+        name="auth/login.html",
+        context={
             "request": request,
             "csrf_token": csrf_token,
             "current_user": None,
@@ -94,8 +118,9 @@ async def login_submit(
     except (AuthenticationError, RateLimitError) as err:
         csrf = get_or_create_csrf_token(request)
         return templates.TemplateResponse(
-            "auth/login.html",
-            {
+            request=request,
+            name="auth/login.html",
+            context={
                 "request": request,
                 "csrf_token": csrf,
                 "current_user": None,
@@ -116,8 +141,9 @@ async def register_page(
 
     csrf_token = get_or_create_csrf_token(request)
     response = templates.TemplateResponse(
-        "auth/register.html",
-        {
+        request=request,
+        name="auth/register.html",
+        context={
             "request": request,
             "csrf_token": csrf_token,
             "current_user": None,
@@ -161,12 +187,28 @@ async def register_submit(
         user_service.register_user(data)
         return RedirectResponse(url="/login?registered=1", status_code=status.HTTP_303_SEE_OTHER)
 
+    except PydanticValidationError as err:
+        csrf = get_or_create_csrf_token(request)
+        return templates.TemplateResponse(
+            request=request,
+            name="auth/register.html",
+            context={
+                "request": request,
+                "csrf_token": csrf,
+                "current_user": None,
+                "error_msg": _friendly_registration_error(err),
+                "name": name,
+                "email": email,
+            },
+            status_code=status.HTTP_400_BAD_REQUEST,
+        )
     except (ValueError, ValidationError) as err:
         csrf = get_or_create_csrf_token(request)
         error_text = err.message if hasattr(err, "message") else str(err)
         return templates.TemplateResponse(
-            "auth/register.html",
-            {
+            request=request,
+            name="auth/register.html",
+            context={
                 "request": request,
                 "csrf_token": csrf,
                 "current_user": None,
@@ -216,8 +258,9 @@ async def profile_page(
 ):
     csrf_token = get_or_create_csrf_token(request)
     return templates.TemplateResponse(
-        "user/profile.html",
-        {
+        request=request,
+        name="user/profile.html",
+        context={
             "request": request,
             "current_user": current_user,
             "csrf_token": csrf_token,

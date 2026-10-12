@@ -26,8 +26,9 @@ async def list_active_rooms(
     csrf_token = get_or_create_csrf_token(request)
 
     return templates.TemplateResponse(
-        "user/rooms_list.html",
-        {
+        request=request,
+        name="user/rooms_list.html",
+        context={
             "request": request,
             "current_user": current_user,
             "rooms": rooms,
@@ -52,8 +53,9 @@ async def room_detail(
     csrf_token = get_or_create_csrf_token(request)
 
     return templates.TemplateResponse(
-        "user/room_detail.html",
-        {
+        request=request,
+        name="user/room_detail.html",
+        context={
             "request": request,
             "current_user": current_user,
             "room": room,

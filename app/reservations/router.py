@@ -54,8 +54,9 @@ async def user_dashboard(
     csrf_token = get_or_create_csrf_token(request)
 
     return templates.TemplateResponse(
-        "user/dashboard.html",
-        {
+        request=request,
+        name="user/dashboard.html",
+        context={
             "request": request,
             "current_user": current_user,
             "csrf_token": csrf_token,
@@ -98,8 +99,9 @@ async def list_my_reservations(
         success_msg = "Reserva cancelada correctamente."
 
     return templates.TemplateResponse(
-        "user/reservations_list.html",
-        {
+        request=request,
+        name="user/reservations_list.html",
+        context={
             "request": request,
             "current_user": current_user,
             "reservations": enriched,
@@ -122,8 +124,9 @@ async def new_reservation_page(
     csrf_token = get_or_create_csrf_token(request)
 
     return templates.TemplateResponse(
-        "user/reservation_new.html",
-        {
+        request=request,
+        name="user/reservation_new.html",
+        context={
             "request": request,
             "current_user": current_user,
             "rooms": rooms,
@@ -169,8 +172,9 @@ async def create_reservation_submit(
         error_text = err.message if hasattr(err, "message") else str(err)
 
         return templates.TemplateResponse(
-            "user/reservation_new.html",
-            {
+            request=request,
+            name="user/reservation_new.html",
+            context={
                 "request": request,
                 "current_user": current_user,
                 "rooms": rooms,

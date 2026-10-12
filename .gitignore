@@ -28,7 +28,12 @@ env/
 
 # Environment files
 .env
+.env.*
+!.env.example
 *.env.local
+
+# Runtime logs
+*.log
 
 # Testing and coverage
 .pytest_cache/

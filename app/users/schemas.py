@@ -1,47 +1,44 @@
-"""Pydantic validation schemas for Users."""
+"""Pydantic validation schemas for users."""
 
 from datetime import datetime
 from typing import Optional
 import uuid
 
-from pydantic import BaseModel, Field, root_validator, validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+
 from app.core.security import validate_password_strength
 
 
 class UserCreate(BaseModel):
-    """Schema for public user registration (RB-01, RS-05, RS-06).
-
-    Explicitly excludes role, is_active, and id to prevent parameter tampering (CA-03).
-    """
+    """Schema for public user registration."""
 
     name: str = Field(..., min_length=1, max_length=100)
     email: str = Field(..., min_length=3, max_length=255)
     password: str = Field(..., min_length=10, max_length=128)
     password_confirmation: str = Field(..., min_length=10, max_length=128)
 
-    @validator("email")
+    @field_validator("email")
+    @classmethod
     def validate_email_format(cls, v: str) -> str:
         clean = v.strip().lower()
         if "@" not in clean or "." not in clean.split("@")[-1]:
             raise ValueError("El correo electrónico no tiene un formato válido.")
         return clean
 
-    @validator("name")
+    @field_validator("name")
+    @classmethod
     def validate_name_not_blank(cls, v: str) -> str:
         clean = v.strip()
         if not clean:
             raise ValueError("El nombre no puede estar vacío.")
         return clean
 
-    @root_validator
-    def validate_passwords_match(cls, values):
-        password = values.get("password")
-        confirmation = values.get("password_confirmation")
-        if password and confirmation and password != confirmation:
+    @model_validator(mode="after")
+    def validate_passwords_match(self) -> "UserCreate":
+        if self.password != self.password_confirmation:
             raise ValueError("Las contraseñas no coinciden.")
-        if password:
-            validate_password_strength(password)
-        return values
+        validate_password_strength(self.password)
+        return self
 
 
 class UserLogin(BaseModel):
@@ -50,13 +47,14 @@ class UserLogin(BaseModel):
     email: str = Field(..., min_length=3, max_length=255)
     password: str = Field(..., min_length=1, max_length=128)
 
-    @validator("email")
+    @field_validator("email")
+    @classmethod
     def clean_email(cls, v: str) -> str:
         return v.strip().lower()
 
 
 class UserResponse(BaseModel):
-    """Safe schema for user details, excluding password_hash (RS-12)."""
+    """Safe schema for user details, excluding password_hash."""
 
     id: uuid.UUID
     name: str
@@ -66,5 +64,4 @@ class UserResponse(BaseModel):
     created_at: datetime
     updated_at: Optional[datetime] = None
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)

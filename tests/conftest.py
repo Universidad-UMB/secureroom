@@ -1,7 +1,13 @@
 """Test fixtures and test client configuration for SecureRoom tests."""
 
+import os
+
 import pytest
 from fastapi.testclient import TestClient
+
+# Tests use the in-memory repositories and must not depend on a developer's
+# local PostgreSQL credentials from .env.
+os.environ["USE_IN_MEMORY_DB"] = "true"
 
 from app.main import app
 from app.users.repository import in_memory_user_repo

@@ -50,8 +50,9 @@ async def admin_dashboard(
     csrf_token = get_or_create_csrf_token(request)
 
     return templates.TemplateResponse(
-        "admin/dashboard.html",
-        {
+        request=request,
+        name="admin/dashboard.html",
+        context={
             "request": request,
             "current_user": admin_user,
             "csrf_token": csrf_token,
@@ -77,8 +78,9 @@ async def admin_rooms_list(
     csrf_token = get_or_create_csrf_token(request)
 
     return templates.TemplateResponse(
-        "admin/rooms.html",
-        {
+        request=request,
+        name="admin/rooms.html",
+        context={
             "request": request,
             "current_user": admin_user,
             "csrf_token": csrf_token,
@@ -95,8 +97,9 @@ async def admin_room_new_page(
 ):
     csrf_token = get_or_create_csrf_token(request)
     return templates.TemplateResponse(
-        "admin/room_form.html",
-        {
+        request=request,
+        name="admin/room_form.html",
+        context={
             "request": request,
             "current_user": admin_user,
             "room": None,
@@ -134,8 +137,9 @@ async def admin_room_create_submit(
         csrf = get_or_create_csrf_token(request)
         error_text = err.message if hasattr(err, "message") else str(err)
         return templates.TemplateResponse(
-            "admin/room_form.html",
-            {
+            request=request,
+            name="admin/room_form.html",
+            context={
                 "request": request,
                 "current_user": admin_user,
                 "room": None,
@@ -165,8 +169,9 @@ async def admin_room_edit_page(
 
     csrf_token = get_or_create_csrf_token(request)
     return templates.TemplateResponse(
-        "admin/room_form.html",
-        {
+        request=request,
+        name="admin/room_form.html",
+        context={
             "request": request,
             "current_user": admin_user,
             "room": room,
@@ -206,8 +211,9 @@ async def admin_room_edit_submit(
         csrf = get_or_create_csrf_token(request)
         error_text = err.message if hasattr(err, "message") else str(err)
         return templates.TemplateResponse(
-            "admin/room_form.html",
-            {
+            request=request,
+            name="admin/room_form.html",
+            context={
                 "request": request,
                 "current_user": admin_user,
                 "room": room,
@@ -261,8 +267,9 @@ async def admin_reservations_list(
     csrf_token = get_or_create_csrf_token(request)
 
     return templates.TemplateResponse(
-        "admin/reservations.html",
-        {
+        request=request,
+        name="admin/reservations.html",
+        context={
             "request": request,
             "current_user": admin_user,
             "csrf_token": csrf_token,
@@ -295,8 +302,9 @@ async def admin_users_list(
     csrf_token = get_or_create_csrf_token(request)
 
     return templates.TemplateResponse(
-        "admin/users.html",
-        {
+        request=request,
+        name="admin/users.html",
+        context={
             "request": request,
             "current_user": admin_user,
             "csrf_token": csrf_token,
@@ -316,8 +324,9 @@ async def admin_audit_logs(
     csrf_token = get_or_create_csrf_token(request)
 
     return templates.TemplateResponse(
-        "admin/audit.html",
-        {
+        request=request,
+        name="admin/audit.html",
+        context={
             "request": request,
             "current_user": admin_user,
             "csrf_token": csrf_token,

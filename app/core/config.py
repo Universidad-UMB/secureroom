@@ -1,46 +1,45 @@
-"""SecureRoom Configuration Module.
+"""SecureRoom configuration loaded from environment variables and ``.env``."""
 
-Handles environment variables and application settings using Pydantic.
-Ensures security defaults (HttpOnly, Lax cookies, external secrets).
-"""
-
-import os
-from pydantic import BaseSettings, Field
+from pydantic import Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
     """Application settings loaded from environment variables or .env file."""
 
     app_name: str = "SecureRoom"
-    app_env: str = Field(default="development", env="APP_ENV")
-    host: str = Field(default="0.0.0.0", env="HOST")
-    port: int = Field(default=8000, env="PORT")
+    app_env: str = "development"
+    host: str = "0.0.0.0"
+    port: int = 8000
 
     # Database configuration
     database_url: str = Field(
-        default="postgresql://secureroom_user:secureroom_password@localhost:5432/secureroom",
-        env="DATABASE_URL",
+        default="postgresql+psycopg2://secureroom_user:secureroom_password@localhost:5432/secureroom",
     )
+    # Development defaults to the in-memory repositories. Set this to false
+    # when PostgreSQL and the Alembic schema are available.
+    use_in_memory_db: bool | None = None
 
     # Session & Security
     session_secret: str = Field(
         default="insecure_default_secret_key_change_me_in_production_32chars",
-        env="SESSION_SECRET",
     )
     session_cookie_name: str = "secureroom_session"
-    session_cookie_secure: bool = Field(default=False, env="SESSION_COOKIE_SECURE")
+    session_cookie_secure: bool = False
     session_cookie_samesite: str = "lax"
     session_cookie_httponly: bool = True
-    session_max_age_seconds: int = Field(default=28800, env="SESSION_MAX_AGE_SECONDS")  # 8 hours
+    session_max_age_seconds: int = 28800  # 8 hours
 
     # Rate limiting for login
     login_max_failed_attempts: int = 5
     login_lockout_seconds: int = 300  # 5 minutes
 
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
-        case_sensitive = False
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        case_sensitive=False,
+        extra="ignore",
+    )
 
     @property
     def is_production(self) -> bool:
@@ -51,6 +50,13 @@ class Settings(BaseSettings):
         if self.is_production:
             return True
         return self.session_cookie_secure
+
+    @property
+    def effective_use_in_memory_db(self) -> bool:
+        """Use in-memory repositories by default in development only."""
+        if self.use_in_memory_db is not None:
+            return self.use_in_memory_db
+        return not self.is_production
 
 
 # Singleton instance

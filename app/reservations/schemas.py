@@ -1,39 +1,33 @@
-"""Pydantic schemas for Reservation validation."""
+"""Pydantic schemas for reservation validation."""
 
 from datetime import datetime, timezone
 from typing import Optional
 import uuid
 
-from pydantic import BaseModel, Field, root_validator
+from pydantic import BaseModel, ConfigDict, model_validator
 
 
 class ReservationCreate(BaseModel):
-    """Schema for creating a reservation.
-
-    Explicitly excludes user_id and status to prevent parameter tampering (RS-05, CA-03).
-    """
+    """Schema for creating a reservation."""
 
     room_id: uuid.UUID
     start_datetime: datetime
     end_datetime: datetime
 
-    @root_validator
-    def validate_times(cls, values):
-        start = values.get("start_datetime")
-        end = values.get("end_datetime")
+    @model_validator(mode="after")
+    def validate_times(self) -> "ReservationCreate":
+        if self.start_datetime >= self.end_datetime:
+            raise ValueError("La hora de inicio debe ser anterior a la hora de finalización.")
 
-        if start and end:
-            # RB-10: start must be before end
-            if start >= end:
-                raise ValueError("La hora de inicio debe ser anterior a la hora de finalización.")
-
-            # RB-11: reservation must be in the future
-            now = datetime.now(timezone.utc)
-            start_utc = start if start.tzinfo is not None else start.replace(tzinfo=timezone.utc)
-            if start_utc < now:
-                raise ValueError("La fecha y hora de inicio debe ser futura.")
-
-        return values
+        now = datetime.now(timezone.utc)
+        start_utc = (
+            self.start_datetime
+            if self.start_datetime.tzinfo is not None
+            else self.start_datetime.replace(tzinfo=timezone.utc)
+        )
+        if start_utc < now:
+            raise ValueError("La fecha y hora de inicio debe ser futura.")
+        return self
 
 
 class AvailabilityCheck(BaseModel):
@@ -43,13 +37,11 @@ class AvailabilityCheck(BaseModel):
     start_datetime: datetime
     end_datetime: datetime
 
-    @root_validator
-    def validate_times(cls, values):
-        start = values.get("start_datetime")
-        end = values.get("end_datetime")
-        if start and end and start >= end:
+    @model_validator(mode="after")
+    def validate_times(self) -> "AvailabilityCheck":
+        if self.start_datetime >= self.end_datetime:
             raise ValueError("La hora de inicio debe ser anterior a la hora de finalización.")
-        return values
+        return self
 
 
 class ReservationResponse(BaseModel):
@@ -68,5 +60,4 @@ class ReservationResponse(BaseModel):
     user_name: Optional[str] = None
     user_email: Optional[str] = None
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)

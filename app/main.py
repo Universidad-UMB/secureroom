@@ -75,8 +75,9 @@ async def csrf_exception_handler(request: Request, exc: CSRFError):
     accept = request.headers.get("accept", "")
     if "text/html" in accept:
         return templates.TemplateResponse(
-            "error.html",
-            {
+            request=request,
+            name="error.html",
+            context={
                 "request": request,
                 "current_user": None,
                 "status_code": 403,
@@ -99,8 +100,9 @@ async def http_exception_handler(request: Request, exc: HTTPException):
             500: "Error Interno del Servidor",
         }
         return templates.TemplateResponse(
-            "error.html",
-            {
+            request=request,
+            name="error.html",
+            context={
                 "request": request,
                 "current_user": None,
                 "status_code": exc.status_code,
@@ -121,8 +123,9 @@ async def unhandled_exception_handler(request: Request, exc: Exception):
     accept = request.headers.get("accept", "")
     if "text/html" in accept:
         return templates.TemplateResponse(
-            "error.html",
-            {
+            request=request,
+            name="error.html",
+            context={
                 "request": request,
                 "current_user": None,
                 "status_code": 500,

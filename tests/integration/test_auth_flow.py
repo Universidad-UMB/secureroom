@@ -24,6 +24,27 @@ class TestAuthFlow(unittest.TestCase):
         login_rate_limiter.reset_all()
         self.client = TestClient(app)
 
+    def test_short_password_returns_friendly_validation_message(self):
+        self.client.get("/register")
+        anon_cookie = self.client.cookies.get("secureroom_csrf_anon")
+        csrf_token = generate_csrf_token(anon_cookie)
+
+        response = self.client.post(
+            "/register",
+            data={
+                "name": "Integration User",
+                "email": "short-password@test.com",
+                "password": "heidy10",
+                "password_confirmation": "heidy10",
+                "csrf_token": csrf_token,
+            },
+            follow_redirects=False,
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("La contraseña debe tener al menos 10 caracteres.", response.text)
+        self.assertNotIn("pydantic.dev", response.text)
+
     def test_full_registration_and_login_flow(self):
         """User registers, logs in, accesses dashboard, and logs out."""
         # 1. Get register page

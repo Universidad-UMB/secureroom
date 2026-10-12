@@ -1,18 +1,14 @@
-"""Database engine and session management.
+"""Database engine and session management."""
 
-Configures connection pooling and session makers for PostgreSQL via SQLAlchemy.
-Provides fallback in-memory database storage if SQLAlchemy is not installed in the environment.
-"""
-
-from contextlib import contextmanager
 from typing import Generator
+
 from app.core.config import settings
 from app.database.base import HAS_SQLALCHEMY
 
 _engine = None
 _SessionLocal = None
 
-if HAS_SQLALCHEMY:
+if HAS_SQLALCHEMY and not settings.effective_use_in_memory_db:
     from sqlalchemy import create_engine
     from sqlalchemy.orm import sessionmaker
 
