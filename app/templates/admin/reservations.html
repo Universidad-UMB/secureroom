@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}Supervisión de Reservas — SecureRoom Admin{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Supervisión de Reservas</h1>
+      <p class="text-sm text-slate-500 mt-1">Monitorea y gestiona administrativamente todas las reservas del sistema (RF-21, RF-22)</p>
+    </div>
+  </div>
+
+  {% if reservations %}
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+              <th class="px-6 py-4">Usuario</th>
+              <th class="px-6 py-4">Sala</th>
+              <th class="px-6 py-4">Fecha y Hora Inicio</th>
+              <th class="px-6 py-4">Fecha y Hora Fin</th>
+              <th class="px-6 py-4">Estado</th>
+              <th class="px-6 py-4 text-right">Acciones</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 text-sm">
+            {% for r in reservations %}
+              <tr class="hover:bg-slate-50 transition">
+                <td class="px-6 py-4">
+                  <div class="font-medium text-slate-900">{{ r.user_name }}</div>
+                  <div class="text-xs text-slate-500">{{ r.user_email }}</div>
+                </td>
+                <td class="px-6 py-4 font-medium text-slate-800">
+                  {{ r.room_name }}
+                </td>
+                <td class="px-6 py-4 text-slate-600 whitespace-nowrap">
+                  {{ r.start_datetime.strftime('%d/%m/%Y %H:%M') }}
+                </td>
+                <td class="px-6 py-4 text-slate-600 whitespace-nowrap">
+                  {{ r.end_datetime.strftime('%d/%m/%Y %H:%M') }}
+                </td>
+                <td class="px-6 py-4">
+                  {% if r.status == 'ACTIVE' %}
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold badge-active">
+                      Activa
+                    </span>
+                  {% else %}
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold badge-cancelled">
+                      Cancelada
+                    </span>
+                  {% endif %}
+                </td>
+                <td class="px-6 py-4 text-right whitespace-nowrap">
+                  {% if r.status == 'ACTIVE' %}
+                    <!-- Admin cancellation with CSRF and confirmation modal (RB-17) -->
+                    <form id="admin-cancel-form-{{ r.id }}" action="/admin/reservations/{{ r.id }}/cancel" method="POST" class="inline">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                      <button type="button"
+                        onclick="openConfirmModal(
+                          'Cancelación Administrativa',
+                          '¿Confirma que desea cancelar administrativamente la reserva de {{ r.user_name }} para la sala {{ r.room_name }}?',
+                          'Sí, Cancelar Reserva',
+                          'admin-cancel-form-{{ r.id }}'
+                        )"
+                        class="text-xs font-semibold text-rose-600 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 px-3 py-1.5 rounded-md transition">
+                        Cancelar Reserva
+                      </button>
+                    </form>
+                  {% else %}
+                    <span class="text-xs text-slate-400 italic">Cancelada</span>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  {% else %}
+    <div class="bg-white rounded-2xl border border-slate-200 p-12 text-center shadow-sm">
+      <div class="w-16 h-16 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center mx-auto mb-4">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+        </svg>
+      </div>
+      <h3 class="text-lg font-bold text-slate-800">No hay reservas registradas</h3>
+      <p class="text-sm text-slate-500 mt-1 max-w-sm mx-auto">No existen registros de reservas en el sistema actualmente.</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

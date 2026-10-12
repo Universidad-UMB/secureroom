@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Usuarios Registrados — SecureRoom Admin{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Usuarios Registrados</h1>
+      <p class="text-sm text-slate-500 mt-1">Consulta administrativa de identidades y roles (RF-06, Solo lectura)</p>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+            <th class="px-6 py-4">Nombre</th>
+            <th class="px-6 py-4">Correo Electrónico</th>
+            <th class="px-6 py-4">Rol</th>
+            <th class="px-6 py-4">Estado</th>
+            <th class="px-6 py-4">Fecha de Registro</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100 text-sm">
+          {% for u in users %}
+            <tr class="hover:bg-slate-50 transition">
+              <td class="px-6 py-4 font-semibold text-slate-900">
+                {{ u.name }}
+              </td>
+              <td class="px-6 py-4 text-slate-600">
+                {{ u.email }}
+              </td>
+              <td class="px-6 py-4">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold {% if u.role == 'ADMIN' %}badge-admin{% else %}badge-user{% endif %}">
+                  {{ u.role }}
+                </span>
+              </td>
+              <td class="px-6 py-4">
+                {% if u.is_active %}
+                  <span class="inline-flex items-center text-xs font-semibold text-emerald-700">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5"></span>
+                    Activo
+                  </span>
+                {% else %}
+                  <span class="inline-flex items-center text-xs font-semibold text-slate-400">
+                    <span class="w-1.5 h-1.5 rounded-full bg-slate-400 mr-1.5"></span>
+                    Inactivo
+                  </span>
+                {% endif %}
+              </td>
+              <td class="px-6 py-4 text-slate-500 text-xs whitespace-nowrap">
+                {{ u.created_at.strftime('%d/%m/%Y %H:%M') if u.created_at else '—' }}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}Gestión de Salas — SecureRoom Admin{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Gestión de Salas</h1>
+      <p class="text-sm text-slate-500 mt-1">Crea, edita y administra el estado de disponibilidad de las salas</p>
+    </div>
+    <a href="/admin/rooms/new" class="inline-flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium text-sm rounded-lg shadow-sm transition">
+      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+      </svg>
+      Crear Sala
+    </a>
+  </div>
+
+  <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+            <th class="px-6 py-4">Nombre</th>
+            <th class="px-6 py-4">Ubicación</th>
+            <th class="px-6 py-4">Capacidad</th>
+            <th class="px-6 py-4">Estado</th>
+            <th class="px-6 py-4 text-right">Acciones</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100 text-sm">
+          {% for r in rooms %}
+            <tr class="hover:bg-slate-50 transition">
+              <td class="px-6 py-4 font-semibold text-slate-900">
+                {{ r.name }}
+              </td>
+              <td class="px-6 py-4 text-slate-600">
+                {{ r.location }}
+              </td>
+              <td class="px-6 py-4 text-slate-600">
+                {{ r.capacity }} personas
+              </td>
+              <td class="px-6 py-4">
+                {% if r.is_active %}
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold badge-active">
+                    Activa
+                  </span>
+                {% else %}
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold badge-cancelled">
+                    Inactiva
+                  </span>
+                {% endif %}
+              </td>
+              <td class="px-6 py-4 text-right space-x-2 whitespace-nowrap">
+                <a href="/admin/rooms/{{ r.id }}/edit" class="text-xs font-semibold text-purple-600 hover:text-purple-800 bg-purple-50 hover:bg-purple-100 px-3 py-1.5 rounded-md transition">
+                  Editar
+                </a>
+
+                <!-- Toggle active state with confirmation modal and CSRF -->
+                <form id="toggle-form-{{ r.id }}" action="/admin/rooms/{{ r.id }}/toggle-status" method="POST" class="inline">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                  <button type="button"
+                    onclick="openConfirmModal(
+                      'Cambiar Estado de Sala',
+                      '¿Confirma que desea {{ 'desactivar' if r.is_active else 'activar' }} la sala {{ r.name }}? {{ 'No admitirá nuevas reservas mientras esté inactiva.' if r.is_active else 'Volverá a estar disponible para reservas.' }}',
+                      '{{ 'Desactivar Sala' if r.is_active else 'Activar Sala' }}',
+                      'toggle-form-{{ r.id }}'
+                    )"
+                    class="text-xs font-semibold {% if r.is_active %}text-amber-700 bg-amber-50 hover:bg-amber-100{% else %}text-emerald-700 bg-emerald-50 hover:bg-emerald-100{% endif %} px-3 py-1.5 rounded-md transition">
+                    {{ "Desactivar" if r.is_active else "Activar" }}
+                  </button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

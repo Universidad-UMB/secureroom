@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}{{ "Editar Sala" if room else "Nueva Sala" }} — SecureRoom Admin{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto py-6">
+  <div class="mb-4">
+    <a href="/admin/rooms" class="inline-flex items-center text-sm font-medium text-slate-500 hover:text-purple-600 transition">
+      &larr; Volver al listado de salas
+    </a>
+  </div>
+
+  <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8">
+    <div class="mb-6 pb-4 border-b border-slate-100">
+      <h1 class="text-2xl font-bold text-slate-900 tracking-tight">
+        {{ "Editar Sala: " ~ room.name if room else "Crear Nueva Sala" }}
+      </h1>
+      <p class="text-sm text-slate-500 mt-1">Configura las propiedades físicas y capacidad de la sala</p>
+    </div>
+
+    <form action="{{ '/admin/rooms/' ~ room.id ~ '/edit' if room else '/admin/rooms' }}" method="POST" class="space-y-5">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+      <div>
+        <label for="name" class="block text-sm font-medium text-slate-700 mb-1">Nombre de la sala</label>
+        <input type="text" id="name" name="name" required maxlength="100"
+          value="{{ room.name if room else (name or '') }}"
+          class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-500 text-slate-900 shadow-sm"
+          placeholder="Ej: Sala de Juntas Principal">
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label for="location" class="block text-sm font-medium text-slate-700 mb-1">Ubicación</label>
+          <input type="text" id="location" name="location" required maxlength="200"
+            value="{{ room.location if room else (location or '') }}"
+            class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-500 text-slate-900 shadow-sm"
+            placeholder="Ej: Piso 3 - Ala Norte">
+        </div>
+
+        <div>
+          <label for="capacity" class="block text-sm font-medium text-slate-700 mb-1">Capacidad (Personas)</label>
+          <input type="number" id="capacity" name="capacity" required min="1" max="1000"
+            value="{{ room.capacity if room else (capacity or '10') }}"
+            class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-500 text-slate-900 shadow-sm">
+          <p class="text-xs text-slate-400 mt-1">Debe ser un número mayor a cero (RB-08).</p>
+        </div>
+      </div>
+
+      <div>
+        <label for="description" class="block text-sm font-medium text-slate-700 mb-1">Descripción y Equipamiento (Opcional)</label>
+        <textarea id="description" name="description" rows="4" maxlength="1000"
+          class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-500 text-slate-900 shadow-sm"
+          placeholder="Ej: Incluye proyector 4K, videoconferencia Zoom Rooms y pizarra magnética.">{{ room.description if room else (description or '') }}</textarea>
+      </div>
+
+      <div class="pt-4 border-t border-slate-100 flex items-center justify-end space-x-3">
+        <a href="/admin/rooms" class="px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 rounded-lg transition">
+          Cancelar
+        </a>
+        <button type="submit" class="px-6 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-semibold text-sm rounded-lg shadow-sm transition">
+          {{ "Guardar Cambios" if room else "Crear Sala" }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

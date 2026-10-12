@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}Detalle de Sala: {{ room.name }} — SecureRoom{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto py-4">
+  <div class="mb-4">
+    <a href="/rooms" class="inline-flex items-center text-sm font-medium text-slate-500 hover:text-brand-600 transition">
+      &larr; Volver al listado de salas
+    </a>
+  </div>
+
+  <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+    <div class="p-6 sm:p-8">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-6 border-b border-slate-100">
+        <div>
+          <h1 class="text-2xl font-bold text-slate-900 tracking-tight">{{ room.name }}</h1>
+          <p class="text-sm text-slate-500 mt-1 flex items-center">
+            <svg class="w-4 h-4 mr-1 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+            {{ room.location }}
+          </p>
+        </div>
+
+        <div class="flex items-center space-x-3">
+          <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold {% if room.is_active %}badge-active{% else %}badge-cancelled{% endif %}">
+            {{ "Activa" if room.is_active else "Inactiva" }}
+          </span>
+        </div>
+      </div>
+
+      <div class="py-6 space-y-6">
+        <div>
+          <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Capacidad Máxima</h3>
+          <div class="inline-flex items-center px-3.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 font-semibold text-sm">
+            <svg class="w-4 h-4 mr-2 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+            </svg>
+            {{ room.capacity }} Personas
+          </div>
+        </div>
+
+        <div>
+          <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Descripción y Equipamiento</h3>
+          <div class="p-4 rounded-xl bg-slate-50 border border-slate-100 text-sm text-slate-700 leading-relaxed whitespace-pre-line">
+            {{ room.description or "Esta sala no cuenta con una descripción detallada registrada." }}
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-6 border-t border-slate-100 flex items-center justify-between">
+        <span class="text-xs text-slate-400">ID: <code class="font-mono">{{ room.id }}</code></span>
+        {% if room.is_active %}
+          <a href="/reservations/new?room_id={{ room.id }}" class="inline-flex items-center px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-semibold text-sm rounded-lg shadow-sm transition">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+            Reservar esta sala
+          </a>
+        {% else %}
+          <span class="text-sm text-rose-600 font-medium">Esta sala se encuentra inactiva y no admite nuevas reservas.</span>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block title %}Panel Administrativo — SecureRoom{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Panel de Control Administrativo</h1>
+      <p class="text-sm text-slate-500 mt-1">Supervisión integral de usuarios, salas, reservas y eventos de seguridad</p>
+    </div>
+    <div class="flex items-center space-x-3">
+      <a href="/admin/rooms/new" class="inline-flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium text-sm rounded-lg shadow-sm transition">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        </svg>
+        Nueva Sala
+      </a>
+      <a href="/admin/audit" class="inline-flex items-center px-4 py-2 bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 font-medium text-sm rounded-lg shadow-sm transition">
+        Ver Auditoría
+      </a>
+    </div>
+  </div>
+
+  <!-- Metric stats cards -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+    <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
+      <div class="flex items-center justify-between">
+        <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Usuarios</p>
+        <span class="p-2 bg-blue-50 text-blue-600 rounded-lg">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+          </svg>
+        </span>
+      </div>
+      <p class="text-3xl font-extrabold text-slate-900 mt-2">{{ total_users }}</p>
+      <a href="/admin/users" class="text-xs font-semibold text-blue-600 hover:text-blue-700 mt-3 inline-block">Gestionar usuarios &rarr;</a>
+    </div>
+
+    <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
+      <div class="flex items-center justify-between">
+        <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Salas Activas</p>
+        <span class="p-2 bg-emerald-50 text-emerald-600 rounded-lg">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+          </svg>
+        </span>
+      </div>
+      <p class="text-3xl font-extrabold text-slate-900 mt-2">{{ active_rooms }} <span class="text-sm font-normal text-slate-400">/ {{ total_rooms }}</span></p>
+      <a href="/admin/rooms" class="text-xs font-semibold text-emerald-600 hover:text-emerald-700 mt-3 inline-block">Gestionar salas &rarr;</a>
+    </div>
+
+    <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
+      <div class="flex items-center justify-between">
+        <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Reservas Activas</p>
+        <span class="p-2 bg-amber-50 text-amber-600 rounded-lg">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+          </svg>
+        </span>
+      </div>
+      <p class="text-3xl font-extrabold text-slate-900 mt-2">{{ active_reservations }} <span class="text-sm font-normal text-slate-400">/ {{ total_reservations }}</span></p>
+      <a href="/admin/reservations" class="text-xs font-semibold text-amber-600 hover:text-amber-700 mt-3 inline-block">Ver reservas &rarr;</a>
+    </div>
+
+    <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
+      <div class="flex items-center justify-between">
+        <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Eventos de Auditoría</p>
+        <span class="p-2 bg-purple-50 text-purple-600 rounded-lg">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+          </svg>
+        </span>
+      </div>
+      <p class="text-3xl font-extrabold text-slate-900 mt-2">{{ total_audit_events }}</p>
+      <a href="/admin/audit" class="text-xs font-semibold text-purple-600 hover:text-purple-700 mt-3 inline-block">Consultar registros &rarr;</a>
+    </div>
+  </div>
+
+  <!-- Recent audit activity list -->
+  <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-lg font-bold text-slate-900">Actividad Reciente del Sistema</h2>
+      <a href="/admin/audit" class="text-sm font-semibold text-purple-600 hover:text-purple-700">Ver registro completo &rarr;</a>
+    </div>
+
+    {% if recent_events %}
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm">
+          <thead>
+            <tr class="text-xs text-slate-400 border-b border-slate-100 uppercase">
+              <th class="py-2.5">Fecha</th>
+              <th class="py-2.5">Acción</th>
+              <th class="py-2.5">Recurso</th>
+              <th class="py-2.5">Resultado</th>
+              <th class="py-2.5">IP</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            {% for ev in recent_events %}
+              <tr class="hover:bg-slate-50 transition">
+                <td class="py-2.5 text-slate-500 whitespace-nowrap text-xs">
+                  {{ ev.created_at.strftime('%d/%m/%Y %H:%M:%S') }}
+                </td>
+                <td class="py-2.5 font-medium text-slate-800 text-xs">
+                  {{ ev.action }}
+                </td>
+                <td class="py-2.5 text-slate-600 text-xs">
+                  {{ ev.resource_type }} {% if ev.resource_id %}({{ ev.resource_id[:8] }}...){% endif %}
+                </td>
+                <td class="py-2.5">
+                  <span class="inline-flex px-2 py-0.5 rounded text-xs font-semibold {% if ev.result == 'SUCCESS' %}badge-active{% else %}badge-cancelled{% endif %}">
+                    {{ ev.result }}
+                  </span>
+                </td>
+                <td class="py-2.5 text-slate-400 text-xs font-mono">
+                  {{ ev.ip_address or '—' }}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="text-sm text-slate-500 italic py-4">No hay eventos de auditoría registrados todavía.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
